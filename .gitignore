@@ -1,0 +1,4 @@
+.env
+/resume_vector_db
+__pycache__/
+.venv/
