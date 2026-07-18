@@ -7,6 +7,7 @@ from typing import TypedDict, Annotated, Literal
 
 from langgraph.graph import START, END, StateGraph
 from langgraph.graph.message import add_messages
+from langchain_core.messages import HumanMessage
 
 from App.agents.career_assessment_agent import CareerAssessmentAgent
 from App.agents.job_search_agent import JobSearchAgent
@@ -76,12 +77,11 @@ class ExecuteWorkflow:
         input = {
             "messages": [HumanMessage(content="Assess my profile and generate an evaluation report")]
         }
-        
+
         result = self.workflow.invoke(input)
         return result
 
 if __name__ == "__main__":
-    from langchain_core.messages import HumanMessage
 
     input = {
         "messages": [HumanMessage(content="Assess my profile and generate an evaluation report")]
