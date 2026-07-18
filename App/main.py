@@ -1,8 +1,18 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(name="Job Finding API",
               version="0.1.0",
               description="API to find relevant and best to apply jobs based on my profile")
+
+# Allow the static frontend (file://) and any other origin to reach this API
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],   # "*" also covers the null origin sent by file:// pages
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 def root() -> dict:
@@ -80,4 +90,4 @@ from App.workflows.workflow import ExecuteWorkflow
 def process_workflow():
     agent = ExecuteWorkflow()
     result = agent.run_workflow()
-    return result
+    return result["messages"][-1].content
