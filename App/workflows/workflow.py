@@ -35,40 +35,50 @@ def route_job_search(state: AgentState) -> Literal["job_search_tools", "__end__"
 
     return "__end__"
 
-assessment_agent = CareerAssessmentAgent()
-job_search_agent = JobSearchAgent()
+class ExecuteWorkflow:
+    def __init__(self):
+        assessment_agent = CareerAssessmentAgent()
+        job_search_agent = JobSearchAgent()
 
-workflow_builder = StateGraph(AgentState) # Workflow data will be stored and passed around AgentState
+        workflow_builder = StateGraph(AgentState) # Workflow data will be stored and passed around AgentState
 
-workflow_builder.add_node("career_assessment", assessment_agent.agent_node)
-workflow_builder.add_node("assessment_tools", assessment_agent.tool_node)
-workflow_builder.add_node("job_search", job_search_agent.agent_node)
-workflow_builder.add_node("job_search_tools", job_search_agent.tool_node)
+        workflow_builder.add_node("career_assessment", assessment_agent.agent_node)
+        workflow_builder.add_node("assessment_tools", assessment_agent.tool_node)
+        workflow_builder.add_node("job_search", job_search_agent.agent_node)
+        workflow_builder.add_node("job_search_tools", job_search_agent.tool_node)
 
-workflow_builder.add_edge(START, "career_assessment")
-workflow_builder.add_conditional_edges(
-    "career_assessment",
-    route_assessment,
-    {
-        "assessment_tools": "assessment_tools",
-        "__end__": "job_search"
-    }
-)
+        workflow_builder.add_edge(START, "career_assessment")
+        workflow_builder.add_conditional_edges(
+            "career_assessment",
+            route_assessment,
+            {
+                "assessment_tools": "assessment_tools",
+                "__end__": END
+            }
+        )
 
-workflow_builder.add_edge("assessment_tools", "career_assessment")
+        workflow_builder.add_edge("assessment_tools", "career_assessment")
 
-workflow_builder.add_conditional_edges(
-    "job_search",
-    route_job_search,
-    {
-        "job_search_tools": "job_search_tools",
-        "__end__": END
-    }
-)
+        # workflow_builder.add_conditional_edges(
+        #     "job_search",
+        #     route_job_search,
+        #     {
+        #         "job_search_tools": "job_search_tools",
+        #         "__end__": END
+        #     }
+        # )
 
-workflow_builder.add_edge("job_search_tools", "job_search")
+        # workflow_builder.add_edge("job_search_tools", "job_search")
 
-workflow = workflow_builder.compile()
+        self.workflow = workflow_builder.compile()
+
+    def run_workflow(self) -> dict:
+        input = {
+            "messages": [HumanMessage(content="Assess my profile and generate an evaluation report")]
+        }
+        
+        result = self.workflow.invoke(input)
+        return result
 
 if __name__ == "__main__":
     from langchain_core.messages import HumanMessage
@@ -78,9 +88,9 @@ if __name__ == "__main__":
     }
 
     print("\n\n--------------------------OUTPUT STARTS HERE--------------\n\n")
-    output = workflow.invoke(input)
+    # output = workflow.invoke(input)
 
-    print(output["messages"][-1].content)
+    # print(output["messages"][-1].content)
     
     print("\n\n--------------------------OUTPUT ENDS HERE-----------------\n\n")
 
